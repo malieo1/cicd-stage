@@ -16,20 +16,22 @@ pipeline {
         sh 'symfony server:start -d'
       }
     }
-    stage('test hello endpoint') {
-      steps {
-        script {
-          // Wait for the server to start
-          sleep(time: 5, unit: "SECONDS")
-          // Test the endpoint
-          sh 'curl -f http://localhost:8000/hello/world'
+     stage('Run Tests') {
+            steps {
+                sh 'php bin/phpunit'
+            }
         }
-      }
-    }
     stage('stop server') {
       steps {
         sh 'symfony server:stop'
       }
-    }
+    }  
   }
+    post {
+        always {
+            // Archive test results and other artifacts
+            junit '*/target/test-.xml'
+            archiveArtifacts artifacts: '*/target/.jar', allowEmptyArchive: true
+        }
+}
 }
