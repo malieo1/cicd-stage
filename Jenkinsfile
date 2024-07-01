@@ -16,9 +16,9 @@ pipeline {
         sh 'symfony server:start -d'
       }
     }
-     stage('Run Tests') {
+stage('Run Tests') {
             steps {
-                sh 'php bin/phpunit'
+                sh 'vendor/bin/phpunit'
             }
         }
     stage('stop server') {
@@ -27,11 +27,4 @@ pipeline {
       }
     }  
   }
-    post {
-        always {
-            // Archive test results and other artifacts
-            junit '*/target/test-.xml'
-            archiveArtifacts artifacts: '*/target/.jar', allowEmptyArchive: true
-        }
-}
 }
