@@ -35,4 +35,7 @@
 
     <extensions>
     </extensions>
+     <logging>
+        <junit outputFile="test-results.xml" />
+    </logging>
 </phpunit>
