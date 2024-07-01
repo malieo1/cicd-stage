@@ -29,7 +29,7 @@ stage('Run Tests') {
   }
    post {
         always {
-            junit '**/test-results.xml' // Adjust the path to your PHPUnit results file if necessary
+            junit 'test-results.xml' 
         }
     }
 }

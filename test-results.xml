@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="" tests="1" assertions="3" errors="0" warnings="0" failures="0" skipped="0" time="4.111540">
+    <testsuite name="Project Test Suite" tests="1" assertions="3" errors="0" warnings="0" failures="0" skipped="0" time="4.111540">
+      <testsuite name="App\Tests\Controller\HelloWorldControllerTest" file="C:\Users\USER\cicdtest\tests\HelloWorldControllerTest.php" tests="1" assertions="3" errors="0" warnings="0" failures="0" skipped="0" time="4.111540">
+        <testcase name="testIndex" class="App\Tests\Controller\HelloWorldControllerTest" classname="App.Tests.Controller.HelloWorldControllerTest" file="C:\Users\USER\cicdtest\tests\HelloWorldControllerTest.php" line="9" assertions="3" time="4.111540"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>
