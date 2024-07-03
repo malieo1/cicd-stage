@@ -26,6 +26,15 @@ stage('Run Tests') {
         sh 'symfony server:stop'
       }
     }  
+    stage("SonarQube Analysis") {
+    steps {
+        script {
+            withSonarQubeEnv(credentialsId: 'jenkins-sonarqube-token') {
+                sh "/home/azureuser/sonar-scanner-6.1.0.4477-linux-x64/bin/sonar-scanner"
+            }
+        }
+    }
+ }
   }
    post {
         always {
