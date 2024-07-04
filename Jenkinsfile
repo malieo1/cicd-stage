@@ -3,7 +3,7 @@ pipeline {
       environment {
         APP_NAME = "cicd-stage"
         RELEASE = "1.0.0"
-        DOCKER_USER = "dmancloud"
+        DOCKER_USER = "malekzahmoul20971"
         DOCKER_PASS = 'dockerhub'
         IMAGE_NAME = "${DOCKER_USER}" + "/" + "${APP_NAME}"
         IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
