@@ -7,6 +7,8 @@ pipeline {
         DOCKER_PASS = 'dockerhub'
         IMAGE_NAME = "${DOCKER_USER}" + "/" + "${APP_NAME}"
         IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
+        APP_NAME = "cicd-stage"
+        KENKINS_API_TOKEN = "${KENKINS_API_TOKEN}"
     }
   stages {
     stage('verify version') {
@@ -62,6 +64,14 @@ stage('Run Tests') {
                         docker_image.push("${IMAGE_TAG}")
                         docker_image.push('latest')
                     }
+                }
+            }
+
+        }
+        stage("Trigger CD pipeline") {
+            steps {
+                script {
+                    sh "curl -v -k --user admin:${KENKINS_API_TOKEN} -X POST -H 'cache-control: no-cache' -H 'content-type: application/x-www-form-urlencoded' --data 'IMAGE_TAG=${IAMGE_TAG}' 'http://98.66.177.28:8080/job/gitops-pipeline/buildWithParameters?token=gitops-token'"
                 }
             }
 
