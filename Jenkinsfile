@@ -70,7 +70,7 @@ stage('Run Tests') {
         stage("Trigger CD pipeline") {
             steps {
                 script {
-                    sh "curl -v -k --user admin:${KENKINS_API_TOKEN} -X POST -H 'cache-control: no-cache' -H 'content-type: application/x-www-form-urlencoded' --data 'IMAGE_TAG=${IAMGE_TAG}' 'http://98.66.177.28:8080/job/gitops-pipeline/buildWithParameters?token=gitops-token'"
+                    sh "curl -v -k --user admin:${KENKINS_API_TOKEN} -X POST -H 'cache-control: no-cache' -H 'content-type: application/x-www-form-urlencoded' --data 'IMAGE_TAG=${IMAGE_TAG}' 'http://98.66.177.28:8080/job/gitops-pipeline/buildWithParameters?token=gitops-token'"
                 }
             }
 
