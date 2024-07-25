@@ -19,8 +19,12 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Install PHP dependencies
 RUN composer install
 
-# Expose port 80
-EXPOSE 80
+# Update Apache to listen on port 8000
+RUN sed -i 's/Listen 80/Listen 8000/' /etc/apache2/ports.conf
+RUN sed -i 's/<VirtualHost *:80>/<VirtualHost *:8000>/' /etc/apache2/sites-available/000-default.conf
+
+# Expose port 8000
+EXPOSE 8000
 
 # Start the Apache server
 CMD ["apache2-foreground"]
