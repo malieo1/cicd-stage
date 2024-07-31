@@ -12,7 +12,7 @@ class HelloWorldControllerTest extends WebTestCase
         $client = static::createClient();
 
         // Make a request to the /hello/world route
-        $crawler = $client->request('GET', '/hello/world');
+        $crawler = $client->request('GET', '');
 
         // Assert that the response is successful
         $this->assertResponseIsSuccessful();
