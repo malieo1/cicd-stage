@@ -1,94 +1,47 @@
-#syntax=docker/dockerfile:1.4
+# Use the official PHP image with Apache
+FROM php:8.2-apache
 
-# Versions
-FROM dunglas/frankenphp:1-php8.3 AS frankenphp_upstream
+# Set working directory
+WORKDIR /var/www/html
 
-# The different stages of this Dockerfile are meant to be built into separate images
-# https://docs.docker.com/develop/develop-images/multistage-build/#stop-at-a-specific-build-stage
-# https://docs.docker.com/compose/compose-file/#target
+# Copy the current directory contents into the container at /var/www/html
+COPY . /var/www/html
 
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libzip-dev \
+    && docker-php-ext-install pdo pdo_mysql zip \
+    && a2enmod rewrite
 
-# Base FrankenPHP image
-FROM frankenphp_upstream AS frankenphp_base
-
-WORKDIR /app
-
-VOLUME /app/var/
-
-# persistent / runtime deps
-# hadolint ignore=DL3008
-RUN apt-get update && apt-get install -y --no-install-recommends \
-	acl \
-	file \
-	gettext \
-	git \
-	&& rm -rf /var/lib/apt/lists/*
-
-RUN set -eux; \
-	install-php-extensions \
-		@composer \
-		apcu \
-		intl \
-		opcache \
-		zip \
-	;
-
-# https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
-ENV PHP_INI_SCAN_DIR=":$PHP_INI_DIR/app.conf.d"
+# Install PHP dependencies
+RUN composer install --no-scripts --no-autoloader --prefer-dist
 
-###> recipes ###
-###< recipes ###
+# Set correct permissions for Symfony directories
+RUN chown -R www-data:www-data /var/www/html/var /var/www/html/public \
+    && chmod -R 755 /var/www/html/var /var/www/html/public
 
-COPY --link frankenphp/conf.d/10-app.ini $PHP_INI_DIR/app.conf.d/
-COPY --link --chmod=755 frankenphp/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
-COPY --link frankenphp/Caddyfile /etc/caddy/Caddyfile
+# Update Apache to listen on port 8000
+RUN sed -i 's/Listen 80/Listen 8000/' /etc/apache2/ports.conf
 
-ENTRYPOINT ["docker-entrypoint"]
+# Update Apache VirtualHost to serve Symfony public directory
+RUN sed -i 's|<VirtualHost *:80>|<VirtualHost *:8000>|' /etc/apache2/sites-available/000-default.conf \
+    && sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|' /etc/apache2/sites-available/000-default.conf
 
-HEALTHCHECK --start-period=60s CMD curl -f http://localhost:2019/metrics || exit 1
-CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile" ]
+# Ensure correct Directory settings
+RUN echo '<Directory /var/www/html/public>' >> /etc/apache2/sites-available/000-default.conf \
+    && echo '    AllowOverride All' >> /etc/apache2/sites-available/000-default.conf \
+    && echo '    Require all granted' >> /etc/apache2/sites-available/000-default.conf \
+    && echo '</Directory>' >> /etc/apache2/sites-available/000-default.conf
 
-# Dev FrankenPHP image
-FROM frankenphp_base AS frankenphp_dev
+# Expose port 8000
+EXPOSE 8000
 
-ENV APP_ENV=dev XDEBUG_MODE=off
+# Run Apache in the foreground
+CMD ["apache2-foreground"]
 
-RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
-
-RUN set -eux; \
-	install-php-extensions \
-		xdebug \
-	;
-
-COPY --link frankenphp/conf.d/20-app.dev.ini $PHP_INI_DIR/app.conf.d/
-
-CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile", "--watch" ]
-
-# Prod FrankenPHP image
-FROM frankenphp_base AS frankenphp_prod
-
-ENV APP_ENV=prod
-ENV FRANKENPHP_CONFIG="import worker.Caddyfile"
-
-RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
-
-COPY --link frankenphp/conf.d/20-app.prod.ini $PHP_INI_DIR/app.conf.d/
-COPY --link frankenphp/worker.Caddyfile /etc/caddy/worker.Caddyfile
-
-# prevent the reinstallation of vendors at every changes in the source code
-COPY --link composer.* symfony.* ./
-RUN set -eux; \
-	composer install --no-cache --prefer-dist --no-dev --no-autoloader --no-scripts --no-progress
-
-# copy sources
-COPY --link . ./
-RUN rm -Rf frankenphp/
-
-RUN set -eux; \
-	mkdir -p var/cache var/log; \
-	composer dump-autoload --classmap-authoritative --no-dev; \
-	composer dump-env prod; \
-	composer run-script --no-dev post-install-cmd; \
-	chmod +x bin/console; sync;
