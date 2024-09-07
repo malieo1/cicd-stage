@@ -39,7 +39,7 @@ RUN echo '<Directory /var/www/html/public>' >> /etc/apache2/sites-available/000-
     && echo '    Require all granted' >> /etc/apache2/sites-available/000-default.conf \
     && echo '</Directory>' >> /etc/apache2/sites-available/000-default.conf
 
-# Expose port 8000
+
 EXPOSE 8000
 
 # Run Apache in the foreground
