@@ -11,13 +11,15 @@ class HelloWorldControllerTest extends WebTestCase
         // Create a client to make requests
         $client = static::createClient();
 
-        // Make a request to the /hello/world route
-        $crawler = $client->request('GET', '');
+        // Make a request to the root route (empty path)
+        $crawler = $client->request('GET', '/');
 
         // Assert that the response is successful
         $this->assertResponseIsSuccessful();
 
-        // Assert that the response content contains "Hello, World!"
-        $this->assertSelectorTextContains('body', 'Hello, World!');
+        // Assert that the response content contains the updated text
+        $this->assertSelectorTextContains('h1', 'Did you like our project?');
+        $this->assertSelectorExists('button#yes-button');
+        $this->assertSelectorExists('button#no-button');
     }
 }
