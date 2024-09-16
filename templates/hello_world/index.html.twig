@@ -1,20 +1,105 @@
-{% extends 'base.html.twig' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Do You Like Our Project?</title>
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
 
-{% block title %}Hello HelloWorldController!{% endblock %}
+        .container {
+            text-align: center;
+            position: relative; /* To position the "No" button absolutely within */
+            width: 100%;
+            height: 100%;
+        }
 
-{% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+        .buttons {
+            margin-top: 20px;
+        }
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 18px;
+            cursor: pointer;
+        }
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code><a href="{{ 'C:/Users/USER/cicdtest/src/Controller/HelloWorldController.php'|file_link(0) }}">src/Controller/HelloWorldController.php</a></code></li>
-        <li>Your template at <code><a href="{{ 'C:/Users/USER/cicdtest/templates/hello_world/index.html.twig'|file_link(0) }}">templates/hello_world/index.html.twig</a></code></li>
-    </ul>
-</div>
-{% endblock %}
+        #no-button {
+            position: relative; /* Changed to relative initially to enable dynamic movement */
+        }
+
+        #thank-you {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Did you like our project?</h1>
+        <div class="buttons">
+            <button id="yes-button" onclick="showThankYou()">Yes</button>
+            <button id="no-button">No</button>
+        </div>
+        <div id="thank-you">Thank you!</div>
+    </div>
+
+    <script>
+        const button = document.getElementById('no-button');
+        const container = document.querySelector('.container');
+
+        function showThankYou() {
+            document.getElementById('thank-you').style.display = 'block';
+        }
+
+        function moveButton(event) {
+            // Get mouse position
+            const mouseX = event.clientX;
+            const mouseY = event.clientY;
+
+            // Get button and container dimensions and positions
+            const buttonRect = button.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+
+            // Calculate the distance between the mouse and the button center
+            const buttonCenterX = buttonRect.left + buttonRect.width / 2;
+            const buttonCenterY = buttonRect.top + buttonRect.height / 2;
+            const distanceX = mouseX - buttonCenterX;
+            const distanceY = mouseY - buttonCenterY;
+
+            // Define the distance threshold to trigger movement
+            const distanceThreshold = 100;
+
+            // Calculate new button position only if within the threshold
+            if (Math.abs(distanceX) < distanceThreshold && Math.abs(distanceY) < distanceThreshold) {
+                // Move the button to a new random position within the container
+                const maxX = containerRect.width - buttonRect.width;
+                const maxY = containerRect.height - buttonRect.height;
+
+                let newLeft = buttonRect.left + (Math.random() - 0.5) * 200;
+                let newTop = buttonRect.top + (Math.random() - 0.5) * 200;
+
+                // Ensure the button stays within container bounds
+                newLeft = Math.max(containerRect.left, Math.min(newLeft, containerRect.left + maxX));
+                newTop = Math.max(containerRect.top, Math.min(newTop, containerRect.top + maxY));
+
+                button.style.position = 'absolute';
+                button.style.left = `${newLeft - containerRect.left}px`;
+                button.style.top = `${newTop - containerRect.top}px`;
+            }
+        }
+
+        // Add an event listener for mousemove to the document to track mouse movements
+        document.addEventListener('mousemove', moveButton);
+    </script>
+</body>
+</html>
